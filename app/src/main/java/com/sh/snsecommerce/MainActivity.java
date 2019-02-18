@@ -99,8 +99,12 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         //타이머를 이용한 메모리 체크
-        mTimer = new Timer();            //1초마다 현재 사용 메모리 출력
-        mTimer.schedule(new CustomTimer(), 0, 1000);
+        /*mTimer = new Timer();            //1초마다 현재 사용 메모리 출력
+        mTimer.schedule(new CustomTimer(), 0, 1000);*/
+
+        //Thread, Runnable을 이용한 메모리 체크
+        Thread timerThread = new Thread(new TimerThread());
+        timerThread.start();
     }
 
     public void onClick(View v) {
@@ -171,7 +175,30 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    class CustomTimer extends TimerTask {
+    public class TimerThread implements Runnable {
+        @Override
+        public void run() {
+            int count = 0;
+            while(count++ < 1000) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                checkMemory();
+                runOnUiThread(new Runnable() {          //UI 변경
+                    @Override
+                    public void run() {
+                        tv_memory_usage.setText("최대 메모리 : " + maxMemory + "KB\n사용 메모리 : " + allocate_memory + "KB");
+                        Log.e(TAG,"최대 메모리 : " + maxMemory + "KB, 사용 메모리 : " + allocate_memory + "KB");
+                    }
+                });
+            }
+        }
+    }
+
+    /*class CustomTimer extends TimerTask {
         @Override
         public void run() {
             checkMemory();              //현재 메모리 체크
@@ -184,5 +211,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-    }
+    }*/
 }
