@@ -1,12 +1,16 @@
 package com.sh.snsecommerce;
 
 import android.content.Intent;
+import android.os.Debug;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -20,7 +24,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private FirebaseFirestore db;
@@ -28,13 +38,18 @@ public class MainActivity extends AppCompatActivity {
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     ConstraintLayout constraintLayout;
+    RecyclerView recyclerView;
+    TextView tv_memory_usage;
 
-    private static final String TAG = "MainActivity";
+    private Timer mTimer;
 
+    ArrayList<Post> posts;
     private String auth_name;
     private String auth_email;
     private String user_name;
     private String user_email;
+    double maxMemory;
+    double allocate_memory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,16 +59,19 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         navigationView = (NavigationView)findViewById(R.id.navigation_view);
         constraintLayout = (ConstraintLayout)navigationView.getHeaderView(0);
+        recyclerView = (RecyclerView)findViewById(R.id.recycler_view);
+        tv_memory_usage = (TextView)findViewById(R.id.tv_memory_usage);
 
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         db = FirebaseFirestore.getInstance();
 
-        getUser(mAuth);
+        getUser(mAuth);                         //Firestore DB 정보 가져오기
 
         user_name = user.getDisplayName();
         user_email = user.getEmail();
 
+        //NavigationView - TextView에 이름, 메일 출력
         if(user_name != null) {
             TextView tv_user_name = (TextView) constraintLayout.findViewById(R.id.tv_user_name);
             tv_user_name.setText(user_name);
@@ -62,6 +80,27 @@ public class MainActivity extends AppCompatActivity {
             TextView tv_user_email = (TextView) constraintLayout.findViewById(R.id.tv_user_email);
             tv_user_email.setText(user_email);
         }
+
+        posts = new ArrayList<>();
+        for(int i = 0; i < 100; i++) {
+            String name = "name" + String.valueOf(i);
+            String contents = "contents" + String.valueOf(i);
+            String date = "2019-01-" + String.valueOf(i);
+
+            posts.add(new Post(name, contents, date));
+        }
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        RecyclerAdapter adapter = new RecyclerAdapter(posts, getApplicationContext());
+        recyclerView.setAdapter(adapter);
+
+        //타이머를 이용한 메모리 체크
+        mTimer = new Timer();            //1초마다 현재 사용 메모리 출력
+        mTimer.schedule(new CustomTimer(), 0, 1000);
     }
 
     public void onClick(View v) {
@@ -86,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
        }
     }
 
-    public void getUser(FirebaseAuth user) {
+    public void getUser(FirebaseAuth user) {                         //Firestore DB 정보 가져오기
         db.collection("users")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -121,9 +160,29 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    public void checkMemory() {                 //사용 메모리 체크
+        maxMemory = Runtime.getRuntime().maxMemory() / (1024.0f);
+        allocate_memory = Debug.getNativeHeapAllocatedSize() / (1024.0f);
+    }
+
     public void goLoginActivity() {                          //LoginActvity로 이동
         Intent goIntent = new Intent(this, LoginActivity.class);
         startActivity(goIntent);
         finish();
+    }
+
+    class CustomTimer extends TimerTask {
+        @Override
+        public void run() {
+            checkMemory();              //현재 메모리 체크
+
+            runOnUiThread(new Runnable() {          //UI 변경
+                @Override
+                public void run() {
+                    tv_memory_usage.setText("최대 메모리 : " + maxMemory + "KB\n사용 메모리 : " + allocate_memory + "KB");
+                    Log.e(TAG,"최대 메모리 : " + maxMemory + "KB\n사용 메모리 : " + allocate_memory + "KB");
+                }
+            });
+        }
     }
 }
