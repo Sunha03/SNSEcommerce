@@ -12,7 +12,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
 
@@ -26,7 +25,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -43,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Timer mTimer;
 
-    ArrayList<Post> posts;
+    ArrayList<Comment> posts;
     private String auth_name;
     private String auth_email;
     private String user_name;
@@ -87,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
             String contents = "contents" + String.valueOf(i);
             String date = "2019-01-" + String.valueOf(i);
 
-            posts.add(new Post(name, contents, date));
+            posts.add(new Comment(name, contents, date));
         }
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
