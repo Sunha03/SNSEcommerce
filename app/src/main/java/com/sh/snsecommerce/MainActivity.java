@@ -101,8 +101,9 @@ public class MainActivity extends AppCompatActivity {
         mTimer.schedule(new CustomTimer(), 0, 1000);*/
 
         //Thread, Runnable을 이용한 메모리 체크
-        Thread timerThread = new Thread(new TimerThread());
-        timerThread.start();
+        Runnable rnb = new CustomRunnable();
+        Thread th = new Thread(rnb);
+        th.start();
     }
 
     public void onClick(View v) {
@@ -173,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    public class TimerThread implements Runnable {
+    public class CustomRunnable implements Runnable {
         @Override
         public void run() {
             int count = 0;
@@ -188,8 +189,8 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {          //UI 변경
                     @Override
                     public void run() {
-                        tv_memory_usage.setText("최대 메모리 : " + maxMemory + "KB\n사용 메모리 : " + allocate_memory + "KB");
-                        Log.e(TAG,"최대 메모리 : " + maxMemory + "KB, 사용 메모리 : " + allocate_memory + "KB");
+                        tv_memory_usage.setText("최대 메모리 : " + (int)maxMemory + "KB\n사용 메모리 : " + (int)allocate_memory + "KB");
+                        Log.e(TAG,"최대 메모리 : " + (int)maxMemory + "KB, 사용 메모리 : " + (int)allocate_memory + "KB");
                     }
                 });
             }
