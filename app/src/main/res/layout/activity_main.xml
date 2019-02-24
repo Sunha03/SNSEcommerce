@@ -7,14 +7,6 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/btn_setting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:text="Setting"
-        android:onClick="onClick" />
-
-    <Button
         android:id="@+id/btn_logout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,11 +15,24 @@
         android:onClick="onClick" />
 
     <TextView
+        android:id="@+id/tv_memory_usage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Hello World!" />
+        android:layout_toLeftOf="@id/btn_setting"
+        android:layout_toRightOf="@id/btn_logout"/>
 
+    <Button
+        android:id="@+id/btn_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="Setting"
+        android:onClick="onClick" />
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btn_setting"/>
 
 </RelativeLayout>
