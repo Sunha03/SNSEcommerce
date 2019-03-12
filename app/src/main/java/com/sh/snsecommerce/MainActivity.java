@@ -1,6 +1,9 @@
 package com.sh.snsecommerce;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Debug;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -23,6 +26,17 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Timer;
 
@@ -40,8 +54,10 @@ public class MainActivity extends AppCompatActivity {
     TextView tv_memory_usage;
 
     private Timer mTimer;
+    RecyclerAdapter adapter;
+    Thread th;
 
-    ArrayList<Comment> posts;
+    ArrayList<Comment> comments;
     private String auth_name;
     private String auth_email;
     private String user_name;
@@ -79,13 +95,13 @@ public class MainActivity extends AppCompatActivity {
             tv_user_email.setText(user_email);
         }
 
-        posts = new ArrayList<>();
+        comments = new ArrayList<>();
         for(int i = 0; i < 100; i++) {
             String name = "name" + String.valueOf(i);
             String contents = "contents" + String.valueOf(i);
             String date = "2019-01-" + String.valueOf(i);
 
-            posts.add(new Comment(name, contents, date));
+            comments.add(new Comment(name, contents, date));
         }
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -93,17 +109,9 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        RecyclerAdapter adapter = new RecyclerAdapter(posts, getApplicationContext());
+        adapter = new RecyclerAdapter(comments, getApplicationContext());
         recyclerView.setAdapter(adapter);
 
-        //타이머를 이용한 메모리 체크
-        /*mTimer = new Timer();            //1초마다 현재 사용 메모리 출력
-        mTimer.schedule(new CustomTimer(), 0, 1000);*/
-
-        //Thread, Runnable을 이용한 메모리 체크
-        Runnable rnb = new CustomRunnable();
-        Thread th = new Thread(rnb);
-        th.start();
     }
 
     public void onClick(View v) {
@@ -197,18 +205,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /*class CustomTimer extends TimerTask {
-        @Override
-        public void run() {
-            checkMemory();              //현재 메모리 체크
-
-            runOnUiThread(new Runnable() {          //UI 변경
-                @Override
-                public void run() {
-                    tv_memory_usage.setText("최대 메모리 : " + maxMemory + "KB\n사용 메모리 : " + allocate_memory + "KB");
-                    Log.e(TAG,"최대 메모리 : " + maxMemory + "KB\n사용 메모리 : " + allocate_memory + "KB");
-                }
-            });
-        }
-    }*/
 }
