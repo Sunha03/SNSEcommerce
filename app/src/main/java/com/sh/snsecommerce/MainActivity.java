@@ -115,7 +115,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClick(View v) {
-        if(v.getId() == R.id.btn_setting) {                 //drawerLayout 겨키
+        if(v.getId() == R.id.btn_calendar) {                //캘린더 켜기
+            goCalendarActivity();
+        }
+        else if(v.getId() == R.id.btn_setting) {                 //drawerLayout 켜기
             if(!drawerLayout.isDrawerOpen(navigationView)) {
                 drawerLayout.openDrawer(navigationView);
             }
@@ -180,6 +183,11 @@ public class MainActivity extends AppCompatActivity {
         Intent goIntent = new Intent(this, LoginActivity.class);
         startActivity(goIntent);
         finish();
+    }
+
+    public void goCalendarActivity() {                        //CalendarActvity로 이동
+        Intent goIntent = new Intent(this, CalendarActivity.class);
+        startActivity(goIntent);
     }
 
     public class CustomRunnable implements Runnable {
